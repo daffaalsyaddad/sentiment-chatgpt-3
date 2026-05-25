@@ -12,19 +12,18 @@ load_dotenv()
 
 app = Flask(__name__)
 
-cors_origins = os.environ.get("CORS_ORIGINS")
-allowed_origins = (
-    [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
-    if cors_origins
-    else [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ]
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
-
-CORS(app, resources={r"/*": {"origins": allowed_origins}})
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return response
 
 
 @app.route("/health", methods=["GET"])
